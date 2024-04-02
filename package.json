@@ -1,0 +1,19 @@
+{
+  "name": "bookstore",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Online Book Store",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Nodejs",
+    "Expressjs",
+    "mongoDB",
+    "mongoose",
+    "bookstore"
+  ],
+  "author": "jobyer",
+  "license": "ISC"
+}
