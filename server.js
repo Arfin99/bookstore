@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.js";
 import authRoutes from "./routes/auth.js";
 import bookRoutes from "./routes/book.js";
 import orderRoutes from "./routes/order.js";
+import reviewRoutes from "./routes/review.js";
 
 connectDB();
 
@@ -17,6 +18,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/login", authRoutes);
 app.use("/api/book", bookRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/review", reviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is ok....");
