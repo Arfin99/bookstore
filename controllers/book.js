@@ -1,10 +1,33 @@
 import Book from "../models/Book.js";
 
 export const getBook = async (req, res) => {
+  const { page, limit = 10, sort_order = 1 } = req.query;
+  
+  let paginationOption = {};
+  let meta = {};
 
-  let book = await Book.find({isDeleted : 0});
+  const totalDocuments = await Book.countDocuments({ isDeleted: false });
+  meta.totalDocuments = totalDocuments;
 
-  res.send(book);
+  if (page && limit) {
+    paginationOption = {
+      skip: (page - 1) * limit,
+      limit,
+    };
+
+    meta.totalPages = Math.ceil(totalDocuments / limit);
+  }
+
+  let book = await Book.find({}, { isDeleted: 0 }, paginationOption).sort({
+    sequenceNumber: sort_order == -1 ? -1 : 1,
+  });
+
+  let result = {
+    book,
+    meta,
+  };
+
+  res.send(result);
 };
 
 export const addBook = async (req, res) => {

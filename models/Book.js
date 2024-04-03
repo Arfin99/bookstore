@@ -31,11 +31,24 @@ const bookSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    sequenceNumber: {
+      type: Number,
+      unique: true,
+    },
   },
   {
     indexes: [{ title: 1 }, { author: 1 }, { genre: 1 }],
   }
 );
+
+bookSchema.pre("save", async function (next) {
+  const Book = this.constructor;
+  if (!this.sequenceNumber) {
+    const count = await Book.countDocuments({});
+    this.sequenceNumber = count + 1;
+  }
+  next();
+});
 
 bookSchema.pre("find", function () {
   this.where({ isDeleted: false });
