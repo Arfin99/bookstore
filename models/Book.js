@@ -27,11 +27,23 @@ const bookSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: User,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     indexes: [{ title: 1 }, { author: 1 }, { genre: 1 }],
   }
 );
+
+bookSchema.pre("find", function () {
+  this.where({ isDeleted: false });
+});
+
+bookSchema.pre("findOne", function () {
+  this.where({ isDeleted: false });
+});
 
 const Book = mongoose.model("Book", bookSchema);
 
