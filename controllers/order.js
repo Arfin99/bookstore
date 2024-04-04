@@ -37,14 +37,46 @@ export const addOrder = async (req, res) => {
 export const getOrderDetails = async (req, res) => {
   try {
     const { order_id } = req.query;
-    let query = {};
-    if (order_id) {
-      query = {
-        _id: order_id,
-      };
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $match: {
+          ...(order_id && { _id: order_id }),
+        },
+      },
+      {
+        $project: {
+          books: 1,
+          shippingAddress: 1,
+          billingAddress:1,
+          paymentMethod:1,
+          paymentStatus: 1,
+          orderStatus:1,
+          totalPrice: 1,
+          "user._id": 1,
+          "user.name": 1,
+          "user.email": 1,
+        },
+      },
+    ];
+
+    const orders = await Order.aggregate(pipeline);
+    if (orders.length > 0) {
+      res.send(orders);
+    } else {
+      res.status(404).send({ message: "Order not found" });
     }
-    const orders = await Order.find(query);
-    res.send(orders);
   } catch (error) {
     res.status(500).send({ message: "Server Error" });
   }
