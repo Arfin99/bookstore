@@ -1,6 +1,10 @@
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import User from "../models/User.js";
-import { jwtsecret } from "../utils/environment_prop_access.js";
+import {
+  jwtsecret,
+  salt_work_factor,
+} from "../utils/environment_prop_access.js";
 
 export const userRegistration = async (req, res) => {
   try {
@@ -14,7 +18,11 @@ export const userRegistration = async (req, res) => {
     if (user) {
       return res.status(400).send("User already Exists");
     }
-    user = new User({ name, email, password, role });
+
+    const salt = bcrypt.genSaltSync(+salt_work_factor);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+
+    user = new User({ name, email, password: hashedPassword, role });
     await user.save();
 
     const jwtPaylod = { _id: user._id, name: user.name, role: user.role };
@@ -24,6 +32,7 @@ export const userRegistration = async (req, res) => {
     });
     res.send(token);
   } catch (error) {
+    console.log(error);
     res.status(500).send("Server Error");
   }
 };
