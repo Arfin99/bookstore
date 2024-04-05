@@ -70,7 +70,7 @@ export const removeBook = async (req, res) => {
       return res.status(404).send("Book not found");
     }
 
-    res.send(book);
+    res.status(200).send("Removed Book");
   } catch (error) {
     res.status(500).send("Server Error");
   }

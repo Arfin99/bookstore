@@ -30,7 +30,7 @@ export const userRegistration = async (req, res) => {
       algorithm: "HS256",
       expiresIn: "2d",
     });
-    res.send(token);
+    res.status(201).send(`User added, token :${token}`);
   } catch (error) {
     console.log(error);
     res.status(500).send("Server Error");
@@ -40,8 +40,8 @@ export const userRegistration = async (req, res) => {
 export const userProfile = async (req, res) => {
   try {
     const { _id } = req.user;
-    const profile = await User.findById(_id);
-    res.send(profile);
+    const profile = await User.findById(_id, {password: 0});
+    res.status(200).send(profile);
   } catch (error) {
     res.status(500).send("Server Error");
   }

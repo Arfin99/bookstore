@@ -1,0 +1,431 @@
+openapi: 3.0.0
+info:
+  title: Online BookStore
+  description: Online bookstore user can add book in shopping cart and place order
+  version: 1.0.0 
+  
+
+servers:
+  - url: http://localhost:8081/
+    description:  Local server (Docker Build)
+  - url: http://localhost:8080/
+    description:  Local server
+  
+
+ 
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+paths:
+  /api/login:
+    post:
+      tags:
+        - Auth
+      summary: Returns a user token if valid email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: The email address of user
+                  example: "test@email.com"
+                password:
+                  type: string
+                  description: The password of user
+                  example: "123456"
+      responses:
+        '200':
+          description: User Bearer Token :${token}
+        '400':
+          description: Invalid Email or Password
+        '500':
+          description: Server Error
+
+  /api/user:
+    post:
+      tags:
+        - User
+      summary: User Registration & New User added in system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of user
+                  example: "Jobyer"
+                email:
+                  type: string
+                  description: Email address of user
+                  example: "test@email.com"
+                password:
+                  type: string
+                  description: Password of user
+                  example: "123456"
+                role:
+                  type: string
+                  description:  Role of user admin or reqular
+                  example: "admin"
+      responses:
+        '201':
+          description: User added token :${token}
+        '400':
+          description: User Email is Invalid
+        '400':
+          description: User already Exists
+        '500':
+          description: Server Error
+
+    get:
+      tags:
+        - User
+      security:
+        - bearerAuth: []
+      summary: User Details by token.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: The user's name
+                  email:
+                    type: string
+                    description: The user's email address
+                  role:
+                    type: string
+                    description: The user's role
+        '401':
+          description: Unauthorized - Token Not Found
+        '500':
+          description: Server Error
+
+  /api/book:
+    post:
+      tags:
+        - Book
+      security:
+        - bearerAuth: []
+      summary: Save a book in database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The book's title
+                  example: "Clean Code"
+                author:
+                  type: string
+                  description: The book's author
+                  example: "Robert C Martin"
+                genre:
+                  type: string
+                  description: The book's genre
+                  example: "Programming"
+                publicationDate:
+                  type: string
+                  format: date
+                  description: The book's publication date
+                  example: "2023-08-06"
+                price:
+                  type: integer
+                  description: The book's price
+                  example: 220
+      responses:
+        '201':
+          description: Book saved successfully
+        '400':
+          description: Bad request (e.g., invalid data)
+        '500':
+          description: Server Error
+  
+    get:
+      tags:
+        - Book
+      security:
+        - bearerAuth: []
+      summary: Book Details and Book listing with pagination and limit.
+      parameters:
+        - in: query
+          name: page
+          required: false
+          description: Current page of Book list
+        - in: query
+          name: limit
+          required: false
+          description: Limit of Books in Each pages
+        - in: query
+          name: sort_order
+          required: false
+          description: Ascending and Descending Order by it. Assign 1 or -1, 1 for asc and -1 for desc
+      responses:
+        '200':
+          description: Fetch Book list
+        '401':
+          description: Unauthorized - Token Not Found
+        '500':
+          description: Server Error
+    put:
+      tags:
+        - Book
+      security:
+        - bearerAuth: []
+      summary: Book details update by book_id
+      parameters:
+        - in: path
+          name: book_id
+          required: true
+          description: Specific Book Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The book's title
+                  example: "Clean Code"
+                author:
+                  type: string
+                  description: The book's author
+                  example: "Robert C Martin"
+                genre:
+                  type: string
+                  description: The book's genre
+                  example: "Programming"
+                publicationDate:
+                  type: string
+                  format: date
+                  description: The book's publication date
+                  example: "2023-08-06"
+                price:
+                  type: integer
+                  description: The book's price
+                  example: 220   
+      responses:
+        '200':
+          description: Update book
+        '400':
+          description: Book not found
+        '401':
+          description: Unauthorized - Token Not Found
+        '500':
+          description: Server Error
+
+  /api/book/search:
+    get:
+      tags:
+        - Book
+      security:
+        - bearerAuth: []
+      summary: Book Details and Book listing with pagination and limit.
+      parameters:
+        - in: query
+          name: search
+          required: true
+          description: Books search by title, author or genre
+      responses:
+        '200':
+          description: Fetch Book list by Search in title, author or genre
+        '401':
+          description: Unauthorized - Token Not Found
+        '500':
+          description: Server Error
+
+  /api/book/remove:
+    put:
+      tags:
+        - Book
+      security:
+        - bearerAuth: []
+      summary: Book remove by book_id(Soft Delete)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_id:
+                  type: string
+                  description: The book's unique identifier
+                  example: "660deb4d41b6b7002829fe12"
+                 
+      responses:
+        '200':
+          description: Remove book
+        '400':
+          description: Book not found
+        '401':
+          description: Unauthorized - Token Not Found
+        '500':
+          description: Server Error
+
+  /api/order:
+    post:
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      summary: Create a Order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                books:
+                  type: array
+                  description: Array of ordered books
+                  items:
+                    type: object
+                    properties:
+                      bookId:
+                        type: string
+                        description: The book's unique identifier
+                        example: "660da69628bb850f9f36f2fe"
+                      quantity:
+                        type: integer
+                        description: The quantity of the book ordered
+                        example: 2
+                shippingAddress:
+                  type: object
+                  description: Shipping address information
+                  properties:
+                    fullName:
+                      type: string
+                      description: Full name of the recipient
+                      example: "test name"
+                    addressLine:
+                      type: string
+                      description: Address line for shipping
+                      example: "test address"
+                billingAddress:
+                  type: object
+                  description: Billing address information
+                  properties:
+                    fullName:
+                      type: string
+                      description: Full name for billing
+                      example: "test name"
+                    addressLine:
+                      type: string
+                      description: Address line for billing
+                      example: "test address"
+                paymentMethod:
+                  type: string
+                  description: Payment method used (e.g., COD)
+                  example: "COD"
+                paymentStatus:
+                  type: string
+                  description: Current payment status (e.g., pending)
+                  example: "pending"
+                orderStatus:
+                  type: string
+                  description: Current order status (e.g., placed)
+                  example: "placed"
+      responses:
+        '201':
+          description: Order created successfully
+        '400':
+          description: Bad request (e.g., invalid data)
+        '500':
+          description: Internal server error
+  
+    get:
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      summary: Order Details.
+      parameters:
+        - in: query
+          name: order_id
+          required: false
+          description: Specific Order Id
+      responses:
+        '200':
+          description: Fetch Order Details
+        '401':
+          description: Unauthorized - Token Not Found
+        '404':
+          description: Order not found
+        '500':
+          description: Server Error
+          
+  /api/review:
+    post:
+      tags:
+        - Review
+      security:
+        - bearerAuth: []
+      summary: Create a Review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bookId:
+                  type: string
+                  description: The book's unique identifier
+                  example: "660deb4d41b6b7002829fe12"
+                rating:
+                  type: integer
+                  description: The rating for the book (1-10)
+                  example: 4
+                reviewText:
+                  type: string
+                  description: The review text for the book
+                  example: "hahaha"
+      responses:
+        '201':
+          description: Review created successfully
+        '400':
+          description: Bad request (e.g., invalid data)
+        '500':
+          description: Internal server error
+  
+    get:
+      tags:
+        - Review
+      security:
+        - bearerAuth: []
+      summary: Review Details.
+      parameters:
+        - in: query
+          name: review_id
+          required: false
+          description: Specific Review Id
+      responses:
+        '200':
+          description: Fetch review Details
+        '401':
+          description: Unauthorized - Token Not Found
+        '404':
+          description: Review not found
+        '500':
+          description: Server Error
