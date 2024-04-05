@@ -75,7 +75,7 @@ export const getReviewDetails = async (req, res) => {
 
     const reviews = await Review.aggregate(pipeline);
     if (reviews.length > 0) {
-      res.send(reviews);
+      res.status(200).send(reviews);
     } else {
       res.status(404).send({ message: "Review not found" });
     }
