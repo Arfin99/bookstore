@@ -23,7 +23,7 @@ export const login = async (req, res) => {
       expiresIn: "2d",
     });
 
-    res.send(token);
+    res.status(200).send(`User Bearer Token :${token}`);
   } catch (error) {
     res.status(500).send("Server Error");
   }
